@@ -1,29 +1,47 @@
-"""app.py
+"""app
 
-zasta is a gen-z conversation generator.
-It uses a Markov chain-based approach. 
+Module for playing around with MarkovGenerator
 """
+
 from pathlib import Path
-from zasta.markov import Markov
 import pandas as pd
+import logging
+from zasta.markov import MarkovGenerator, MarkovProfiler
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.ERROR)
+log = logging.getLogger("zasta")
+# log.level = logging.INFO
+
+def genz() -> pd.DataFrame:
+    filepath = Path("./data/input/genz/genz.csv")
+    df = pd.read_csv(filepath, encoding="utf-8")
+    return df["phrase"].values
 
 if __name__ == "__main__":
-    # Gen-Z
-    # filepath = Path("./data/genz.csv")
-    # df = pd.read_csv(filepath, encoding="utf-8")
-    # content = "\n".join(df["phrase"].values)
+    pd.set_option('display.precision', 2)
+    # pd.set_option('display.max_colwidth', None)
 
-    # Copypasta
-    # content = Path("./data/copypasta.txt").read_text(encoding="utf-8")
+    samples = genz()
+    # samples = drake()
 
-    # Drake
-    content = Path("./data/drake/drake_lyrics.txt").read_text(encoding="utf-8")
+    title = "Zasta: Gen(erative) Z text"
+    print(title)
+    print("="*len(title))
 
-    print("Zasta".center(15, "="))
-    print()
-    mark = Markov(content)
-    num_sentences = 10
-    for _ in range(num_sentences):
-        print(mark.new_sentence(min_words=15))
-
+    mark = MarkovGenerator(context=2, temperature=5)
+    log.info(mark)
+    mark.train(samples)
+    log.info("\tTraning complete!")
     
+    profiler = MarkovProfiler(samples, mark, k=30)
+    profile = profiler.profile()
+    log.info("\tProfiling complete!")
+
+    print()
+    print("Generating phraZes...")
+    print()
+    for sentence, novelty in profile[["sentence", "novel"]].drop_duplicates().itertuples(index=False):
+        novelty_tag = "NEW" if novelty else "OLD"
+        log.info(f"{novelty_tag} {sentence}")
+
+        if novelty:
+            print(sentence)

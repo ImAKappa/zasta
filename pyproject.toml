@@ -25,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "markovify","nltk", "pandas", "pyarrow",
+  "markovify","nltk", "pandas", "pyarrow", "matplotlib", "seaborn"
 ]
 
 [project.urls]
