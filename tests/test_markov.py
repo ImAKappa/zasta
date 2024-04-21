@@ -1,5 +1,5 @@
 import pytest
-import zasta.markov as zm
+import zasta.language as zm
 
 
 class TestNGram:

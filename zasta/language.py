@@ -16,6 +16,8 @@ logging.basicConfig(format="%(levelname)s:%(funcName)s():%(lineno)d\t%(message)s
 
 import nltk
 
+# TODO: Incorporate Kneser-Ney Smoothing for new words
+
 class Unigram(NamedTuple):
     """A unit of text"""
     token: str
@@ -110,7 +112,8 @@ class FmtNGram:
             if next_unigram is not None and not self._should_not_have_space_before(next_unigram):
                 s.write(" ")
         return s.getvalue().strip()
-    
+
+# TODO (Feature) preserve whitespace (non-word) characters in the tokenization step
 class MarkovGenerator:
 
     def __init__(self, context=2, temperature=1) -> Self:

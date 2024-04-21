@@ -4,7 +4,7 @@ zasta is a gen-z conversation generator.
 It uses a Markov chain-based approach. 
 """
 from pathlib import Path
-from zasta.markov import MarkovGenerator, new_sentences, MarkovProfiler
+from zasta.language import MarkovGenerator, new_sentences, MarkovProfiler
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from pathlib import Path
-from zasta.markov import Markov
+from zasta.language import Markov
 import markovify
 
 if __name__ == "__main__":
