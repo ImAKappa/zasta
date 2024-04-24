@@ -5,7 +5,9 @@
 
 -----
 
-Gen-Z conversation generator. The perfect tool for people who want to fit in with their fellow kids.
+Gen-Z phrase generator. The perfect tool for people who want to fit in with their fellow kids.
+
+> For educational purposes only
 
 **Table of Contents**
 
