@@ -15,7 +15,7 @@ log = logging.getLogger("zasta")
 from nltk.tokenize import word_tokenize, WhitespaceTokenizer
 
 def genz() -> pd.DataFrame:
-    filepath = Path("./data/input/genz/genz.csv")
+    filepath = Path()
     df = pd.read_csv(filepath, encoding="utf-8")
     return df["phrase"].values
 
@@ -27,27 +27,40 @@ def shakespeare() -> list[str]:
     content = Path("./data/input/shortstory/shakespeare.txt").read_text(encoding="utf-8")
     return filter(None, content.splitlines())
 
-if __name__ == "__main__":
-    pd.set_option('display.precision', 2)
-    # pd.set_option('display.max_colwidth', None)
-
+def main() -> None:
     title = "Zasta: Gen(erative) Z text"
     print(title)
     print("="*len(title))
 
-    # --- Load data
-    data = genz()
+    zoomer = None
+    model_path = Path("./models/zoomer.pkl")
+    try:
+        zoomer = LanguageModel.from_pkl(model_path)
+    except FileNotFoundError as err:
+        print(err)
+        print("Creating new model")
+        print()
 
-    # --- Preprocess
-    t = Tokenizer()
-    # samples = [t.word_non_word(text) for text in data]
+        corpus = genz()
+
+        tokenizer = Tokenizer()
+        tokens = tokenizer.tokenize(corpus)
+
+        zoomer = LanguageModel(order=3, temperature=5)
+        print(zoomer)
+
+        zoomer.batch_train(tokens, train_split = 0.8, test_split = 0.2)
+        zoomer.export()
+
+    zoomer.generate(k=20)
+
+
+
+if __name__ == "__main__":
+     # samples = [t.word_non_word(text) for text in data]
     samples = [word_tokenize(text) for text in data]
     ws_tokenizer = WhitespaceTokenizer()
     whitespace = [ws_tokenizer.span_tokenize(text) for text in data]
-
-    # --- Configure Model
-    mark = LanguageModel(order=3, temperature=5)
-    log.info(mark)
     
     # --- Train
     mark.batch_train(samples)

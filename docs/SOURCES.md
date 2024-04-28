@@ -14,6 +14,10 @@ A collection of resources that cover broad topics in natural language processing
 
 > An overview of n-gram language models, models that rely on purely statistical means to model a natural language.
 
+[NLTK Language Model Subpackage](https://www.nltk.org/api/nltk.lm.html)
+
+> Example Python implementation of n-gram language model
+
 [N-Gram: Building the Language Model](https://necromuralist.github.io/Neurotic-Networking/posts/nlp/n-gram-building-the-language-model/index.html)
 
 

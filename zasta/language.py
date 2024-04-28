@@ -11,12 +11,9 @@ import logging
 logging.basicConfig(format="%(levelname)s:%(funcName)s():%(lineno)d\t%(message)s", level=logging.ERROR)
 
 from nltk.util import ngrams
-from nltk import ConditionalFreqDist
+from nltk import ConditionalFreqDist, FreqDist
 
 from zasta.tokenizer import Tokenizer
-
-
-
 
 # TODO: Support more complex Token types (str + part-of-speech tag)
 
@@ -30,19 +27,13 @@ class LanguageModel:
         self._order = order
         self._temperature = temperature
 
-        self._stats: defaultdict[tuple[str, ...], Counter] = defaultdict(Counter)
+        self._model = ConditionalFreqDist()
         self._rng = np.random.default_rng()
 
-        self._padding_start = ["<s>"] * (self._order - 1)
-        self._padding_end = ["</s>"] * (self._order - 1)
+        self._left_pad = "<s>"
+        self._right_pad = "</s>"
 
-        self._is_normalized = False
-        self._words = 0
-
-        # Number of distinct words
         self.vocabulary_size = 0
-
-        self.cfd = ConditionalFreqDist()
 
     def __repr__(self) -> str:
         return f"LanguageModel(context={self._order}, temperature={self._temperature})"
@@ -69,46 +60,35 @@ class LanguageModel:
         )) 
         for ngram in ngram_iter:
             *history, current_token = ngram
-            self._stats[tuple(history)][current_token] += 1
-            self.cfd[tuple(history)][current_token] += 1
+            self._model[tuple(history)][current_token] += 1
 
-    def normalize(self) -> None:
-        if self._is_normalized:
-            return
-        """Normalizes a language model stats object to have probabilities"""
-        d = {}
-        for ngram, counter in self._stats.items():
-            N = sum(counter.values())
-            d[ngram] = {token:count/N for token, count in counter.items()}
-        self._stats = d
-        self._is_normalized = True
+    def generate(self, k: int = 1) -> list[list[str]]:
+        """Generate multiple sets of tokens"""
+        return [self._generate_tokens() for _ in range(k)]
 
-    def generate(self, k: int = 1, delimiter: str = " ") -> list[list[str]]:
-        """Generate multiple ngrams"""
-        return [self._generate_sample(delimiter) for _ in range(k)]
-
-    def _generate_sample(self, delimiter: str) -> list[str]:
+    def _generate_tokens(self) -> list[str]:
         """Generate sample of tokens"""
-        tokens = tuple(self._padding_start)
+        tokens = tuple([self._left_pad]) * (self._order - 1)
         while True:
             history = tokens[-self._order+1:]
-            if history not in self._stats:
+            if history not in self._model:
                 break
-            tokens = tokens + (self._choose_token(self._stats[history]),)
-        return delimiter.join(tokens).strip("<s> ").strip(" </s>")
+            tokens = tokens + (self._choose_token(self._model[history]),)
+        return tokens
 
-    def _choose_token(self, c: Counter) -> str:
+    def _choose_token(self, c: FreqDist) -> str:
         """Chooses a token based on frequency count"""
         weights = np.array(list(c.values()))
+        print(f"{weights=}")
         new_weights = np.exp(weights / self._temperature)
         new_weights /= np.sum(new_weights)
-        token = random.choices(list(c.keys()), new_weights)[0] 
+        token = random.choices(list(c.keys()), new_weights)[0]
         return token
 
 if __name__ == "__main__":
     # from zasta.profiler import MarkovProfiler
     from pprint import pprint
-    from nltk import word_tokenize
+    from zasta.tokenizer import Tokenizer
 
     # pd.set_option('display.precision', 2)
     samples = [
@@ -118,16 +98,14 @@ if __name__ == "__main__":
         "You wouldn't get this from any other guy",
     ]
 
-    # --- Preprocess
-    # t = Tokenizer()
-    # samples = [t.word_non_word(text) for text in samples]
-    samples = [word_tokenize(text) for text in samples]
+    # --- Text Normalization
+    t = Tokenizer()
+    samples = [t.word_non_word(text) for text in samples]
 
     # --- Train
     m = LanguageModel(order=2)
     m.batch_train(samples)
-    pprint(m._stats)
-    pprint(m.cfd.conditions())
+    pprint(m._model)
     # m.normalize()
     # pprint(m._stats)
 

@@ -1,6 +1,8 @@
 # TODO
 
-## Phase 1: Design
+## Stage 1: Prototype
+
+### Phase A: Design
 
 To design Zasta well, I need to learn more.
 Fortunately, I've found a pretty good book on NLP:
@@ -37,8 +39,6 @@ At minimum, I should learn the following skills:
       3. Use smaller-bit numbers
       4. Prune low-frequency ngrams
 
+### Phase B: Implementation
 
-
-Idea: If you're "language" is a binary-representation of a black/white image, you could use this n-gram model to generate images...
-
-Maybe Zasta could generate black/white memes???
+- [ ] Tokenizer: Create a tokenizer using `nltk.word_tokenizer`

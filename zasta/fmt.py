@@ -3,7 +3,7 @@ from zasta.tokenizer import FmtNGram
 
 def new_sentence(mg: LanguageModel) -> str:
     """Generate one sentence from a MarkovGenerator"""
-    ngram = mg._generate_sample()
+    ngram = mg._generate_tokens()
     return FmtNGram(ngram).fmt()
 
 def new_sentences(mg: LanguageModel, k: int = 1) -> list[str]:
