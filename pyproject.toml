@@ -25,7 +25,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "markovify","nltk", "pandas", "pyarrow", "matplotlib", "seaborn"
+  "markovify",
+  "nltk",
+  "pandas",
+  "pyarrow",
+  "matplotlib",
+  "seaborn",
 ]
 
 [project.urls]
@@ -54,7 +59,7 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types]
 dependencies = [

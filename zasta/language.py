@@ -8,6 +8,8 @@ import random
 import pandas as pd
 import numpy as np
 import logging
+from pathlib import Path
+import pickle
 logging.basicConfig(format="%(levelname)s:%(funcName)s():%(lineno)d\t%(message)s", level=logging.ERROR)
 
 from nltk.util import ngrams
@@ -38,6 +40,14 @@ class LanguageModel:
     def __repr__(self) -> str:
         return f"LanguageModel(context={self._order}, temperature={self._temperature})"
 
+    def load(self, p: Path) -> None:
+        with open(p, "rb") as inp:
+            self._model = pickle.load(inp)
+
+    def save(self, p: Path) -> None:
+        with open(p, "wb") as outp:
+            pickle.dump(self._model, outp)
+
     def batch_train(self, samples: list[list[str]]) -> None:
         """Trains the language model on many samples.
         Note, that the samples should be pre-processed into tokens first.
@@ -62,24 +72,38 @@ class LanguageModel:
             *history, current_token = ngram
             self._model[tuple(history)][current_token] += 1
 
+    def _fmt_tokens(self, tokens: list[str]) -> str:
+        """Formats a list of tokens"""
+        tokens = [t for t in tokens if t != self._left_pad and t != self._right_pad]
+        return " ".join(tokens)
+
     def generate(self, k: int = 1) -> list[list[str]]:
         """Generate multiple sets of tokens"""
-        return [self._generate_tokens() for _ in range(k)]
+        # TODO: Play with the generation scheme so that the output is interesting, not too repetitive or too short 
+        phrases = [""]
+        for i in range(k):
+            phrase = self._fmt_tokens(self._generate_tokens())
+            while phrase == phrases[-1]:
+                phrase = self._fmt_tokens(self._generate_tokens())
+            phrases.append(phrase)
+        return phrases[1:]
 
-    def _generate_tokens(self) -> list[str]:
+    def _generate_tokens(self, start: str|None = None) -> list[str]:
         """Generate sample of tokens"""
         tokens = tuple([self._left_pad]) * (self._order - 1)
+        if start:
+            tokens += (start,)
         while True:
             history = tokens[-self._order+1:]
             if history not in self._model:
                 break
             tokens = tokens + (self._choose_token(self._model[history]),)
-        return tokens
+        return list(tokens)
 
     def _choose_token(self, c: FreqDist) -> str:
         """Chooses a token based on frequency count"""
         weights = np.array(list(c.values()))
-        print(f"{weights=}")
+        # print(f"{weights=}")
         new_weights = np.exp(weights / self._temperature)
         new_weights /= np.sum(new_weights)
         token = random.choices(list(c.keys()), new_weights)[0]

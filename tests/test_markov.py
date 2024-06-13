@@ -1,7 +1,6 @@
 import pytest
 import zasta.language as zm
 
-
 class TestNGram:
 
     @pytest.fixture()
