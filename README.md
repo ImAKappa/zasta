@@ -5,7 +5,9 @@
 
 -----
 
-Gen-Z phrase generator. The perfect tool for people who want to fit in with their fellow kids.
+Gen-Z phrase generator.
+
+Based code. Cringe output.
 
 > For educational purposes only
 
